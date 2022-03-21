@@ -1,0 +1,1 @@
+Receiver 2 Buttplug.io mod. Currently just a tcp listener that connects to intiface. Takes commands in the form of [strength],[time]. plans to implement a client into the game receiver 2, that controls sex toys when you do things in game, like shoot or die etc.
