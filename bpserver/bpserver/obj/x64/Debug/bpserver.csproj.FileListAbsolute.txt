@@ -19,3 +19,5 @@ D:\Documents\GitHub\receiver2-bp\bpserver\bpserver\obj\x64\Debug\bpserver.csproj
 D:\Documents\GitHub\receiver2-bp\bpserver\bpserver\obj\x64\Debug\bpserver.csproj.CopyComplete
 D:\Documents\GitHub\receiver2-bp\bpserver\bpserver\obj\x64\Debug\bpclient.exe
 D:\Documents\GitHub\receiver2-bp\bpserver\bpserver\obj\x64\Debug\bpclient.pdb
+D:\Documents\GitHub\receiver2-bp\bpserver\bpserver\bin\x64\Debug\Newtonsoft.Json.dll
+D:\Documents\GitHub\receiver2-bp\bpserver\bpserver\bin\x64\Debug\Newtonsoft.Json.xml
