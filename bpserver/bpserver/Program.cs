@@ -144,8 +144,9 @@ namespace bpclient
                             Console.WriteLine("mask bit not set");
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     break;
                 }
             }
@@ -197,11 +198,9 @@ namespace bpclient
 
         private static async Task ControlDevice(float strength, int time)
         {
-            Console.WriteLine(strength + " for " + time + "ms");
             if (!client.Devices.Any())
             {
                 Console.WriteLine("No devices available. Please scan for a device.");
-                return;
             }
 
             foreach (ButtplugClientDevice device in client.Devices)
@@ -219,6 +218,7 @@ namespace bpclient
                     Console.WriteLine("Device disconnected. Please try another device.");
                 }
             }
+            return;
         }
 
         private static async Task Run()
