@@ -14,6 +14,7 @@ namespace bpclient
     class Program
     {
         static ButtplugClient client;
+        static bool reconnect = false;
 
         public static bool IsConnected(TcpClient _tcpClient)
         {
@@ -62,10 +63,10 @@ namespace bpclient
             TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 54321);
             server.Start();
             Console.WriteLine("Server started on 127.0.0.1:54321.{0}Waiting for a connection", Environment.NewLine);
-            TcpClient client = server.AcceptTcpClient();
-            Console.WriteLine("A client connected.");
 
+            TcpClient client = server.AcceptTcpClient();
             NetworkStream stream = client.GetStream();
+            Console.WriteLine("A client connected.");
             while (true)
             {
                 while (!stream.DataAvailable)
@@ -126,7 +127,9 @@ namespace bpclient
                         }
 
                         if (msglen == 0)
-                            Console.WriteLine("msglen == 0");
+                        {
+                            //Console.WriteLine("msglen == 0");
+                        }
                         else if (mask)
                         {
                             byte[] decoded = new byte[msglen];
@@ -138,7 +141,8 @@ namespace bpclient
 
                             string text = Encoding.UTF8.GetString(decoded);
                             //Console.WriteLine("{0}", text);
-                            await ProcessCommand(text);
+                            bool validtext = await ProcessCommand(text);
+                            if (!validtext) break;
                         }
                         else
                             Console.WriteLine("mask bit not set");
@@ -153,20 +157,44 @@ namespace bpclient
             server.Stop();
         }
 
-        private static async Task ProcessCommand(string text)
+        private static async Task<bool> ProcessCommand(string text)
         {
             if(text.Length > 0)
             {
                 switch(text)
                 {
-                    case "1":
+                    case "0":
                         // player shoot
                         await ControlDevice(0.5, 100);
                         break;
+                    case "1":
+                        // explosion
+                        break;
+                    case "2":
+                        // fall
+                        break;
+                    case "3":
+                        // glass
+                        break;
+                    case "4":
+                        // holsterdischarge
+                        break;
+                    case "5":
+                        // shock
+                        await ControlDevice(1.0, 3000);
+                        break;
+                    case "6":
+                        // shot
+                        await ControlDevice(0.5, 100);
+                        break;
+                    case "7":
+                        // shrapnel
+                        break;
                     default:
                         Console.WriteLine("Code does not match. Received: " + text);
-                        break;
+                        return false;
                 }
+                return true;
                 //int splitindex = text.IndexOf(',');
                 //string sub = text.Substring(0, splitindex);
                 //string sub2 = text.Substring(splitindex + 1, text.Length - splitindex - 1);
@@ -185,6 +213,7 @@ namespace bpclient
                 //    await ControlDevice(strength, time);
                 //}
             }
+            return false;
         }
 
         private static async Task WaitForKey()
@@ -257,6 +286,7 @@ namespace bpclient
                 Console.WriteLine();
                 Console.WriteLine("1. Scan For Devices");
                 Console.WriteLine("2. Control Devices");
+                Console.WriteLine("3. Toggle auto reconnect (currently " + (reconnect ? "enabled" : "disabled") + ")");
                 Console.WriteLine("3. Quit");
                 Console.WriteLine("Choose an option: ");
                 if (!uint.TryParse(Console.ReadLine(), out var choice) ||
@@ -275,6 +305,9 @@ namespace bpclient
                         await Connect();
                         continue;
                     case 3:
+                        reconnect = !reconnect;
+                        continue;
+                    case 4:
                         return;
                     default:
                         continue;
