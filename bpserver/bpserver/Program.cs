@@ -157,32 +157,33 @@ namespace bpclient
         {
             if(text.Length > 0)
             {
-                int splitindex = text.IndexOf(',');
-                string sub = text.Substring(0, splitindex);
-                //if (!String.IsNullOrWhiteSpace(text))
+                switch(text)
+                {
+                    case "1":
+                        // player shoot
+                        await ControlDevice(0.5, 100);
+                        break;
+                    default:
+                        Console.WriteLine("Code does not match. Received: " + text);
+                        break;
+                }
+                //int splitindex = text.IndexOf(',');
+                //string sub = text.Substring(0, splitindex);
+                //string sub2 = text.Substring(splitindex + 1, text.Length - splitindex - 1);
+                //bool failed = false;
+                //if (!float.TryParse(sub, out float strength))
                 //{
-                //    int charLocation = text.IndexOf(',');
-
-                //    if (charLocation > 0)
-                //    {
-                //        sub = text.Substring(0, charLocation);
-                //    }
+                //    failed = true;
                 //}
-                string sub2 = text.Substring(splitindex + 1, text.Length - splitindex - 1);
-                bool failed = false;
-                if (!float.TryParse(sub, out float strength))
-                {
-                    failed = true;
-                }
-                if (!int.TryParse(sub2, out int time))
-                {
-                    failed = true;
-                }
+                //if (!int.TryParse(sub2, out int time))
+                //{
+                //    failed = true;
+                //}
 
-                if (!failed)
-                {
-                    await ControlDevice(strength, time);
-                }
+                //if (!failed)
+                //{
+                //    await ControlDevice(strength, time);
+                //}
             }
         }
 
@@ -196,7 +197,7 @@ namespace bpclient
             Console.ReadKey(true);
         }
 
-        private static async Task ControlDevice(float strength, int time)
+        private static async Task ControlDevice(double strength, int time)
         {
             if (!client.Devices.Any())
             {
