@@ -177,6 +177,7 @@ namespace bpclient
                         break;
                     case "2":
                         // fall
+                        await ControlDevice(0.5, 100);
                         break;
                     case "3":
                         // glass
@@ -191,7 +192,8 @@ namespace bpclient
                         break;
                     case "6":
                         // shot
-                        await VibratePattern(0.6, 100, 10, 5); // temp 5 repeats. maybe in future get how many shots?
+                        //await VibratePattern(0.6, 100, 2, 5); // temp 5 repeats. maybe in future get how many shots?
+                        await ControlDevice(0.8, 600);
                         break;
                     case "7":
                         // shrapnel
