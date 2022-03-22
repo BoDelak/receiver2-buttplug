@@ -1,20 +1,57 @@
 ﻿using Buttplug;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using System.IO;
+using System.Collections.Generic;
 
 namespace bpclient
 {
+    class Item
+    {
+        public double strength;
+        public int time;
+    }
+
     class Program
     {
         static ButtplugClient client;
         static bool reconnect = false;
+        static List<Item> items;
+
+        public static void UpdateValues(string path)
+        {
+            using (StreamReader r = new StreamReader(path))
+            {
+                string json = r.ReadToEnd();
+                items = JsonConvert.DeserializeObject<List<Item>>(json);
+            }
+            if(items.Count < 8)
+            {
+                Console.WriteLine("Less than 8 values loaded. Using default values");
+                items[0].strength = 0.3;
+                items[0].time = 100;
+                items[1].strength = 1.0;
+                items[1].time = 200;
+                items[2].strength = 0.5;
+                items[2].time = 100;
+                items[3].strength = 0.0;
+                items[3].time = 0;
+                items[4].strength = 0.8;
+                items[4].time = 100;
+                items[5].strength = 1.0;
+                items[5].time = 3000;
+                items[6].strength = 0.8;
+                items[6].time = 600;
+                items[7].strength = 0.0;
+                items[7].time = 0;
+            }
+        }
 
         public static bool IsConnected(TcpClient _tcpClient)
         {
@@ -169,34 +206,36 @@ namespace bpclient
                 {
                     case "0":
                         // player shoot
-                        await ControlDevice(0.3, 100);
+                        await ControlDevice(items[0].strength, items[0].time);
                         break;
                     case "1":
                         // explosion
-                        await ControlDevice(1.0, 200);
+                        await ControlDevice(items[1].strength, items[0].time);
                         break;
                     case "2":
                         // fall
-                        await ControlDevice(0.5, 100);
+                        await ControlDevice(items[2].strength, items[2].time);
                         break;
                     case "3":
                         // glass
+                        await ControlDevice(items[3].strength, items[3].time);
                         break;
                     case "4":
                         // holsterdischarge
-                        await ControlDevice(0.8, 100);
+                        await ControlDevice(items[4].strength, items[4].time);
                         break;
                     case "5":
                         // shock
-                        await ControlDevice(1.0, 3000);
+                        await ControlDevice(items[5].strength, items[5].time);
                         break;
                     case "6":
                         // shot
                         //await VibratePattern(0.6, 100, 2, 5); // temp 5 repeats. maybe in future get how many shots?
-                        await ControlDevice(0.8, 600);
+                        await ControlDevice(items[6].strength, items[6].time);
                         break;
                     case "7":
                         // shrapnel
+                        await ControlDevice(items[7].strength, items[7].time);
                         break;
                     default:
                         Console.WriteLine("Invalid code. Received: " + text);
@@ -270,7 +309,7 @@ namespace bpclient
 
         private static async Task Run()
         {
-            client = new ButtplugClient("chungus");
+            client = new ButtplugClient("Receiver 2");
 
             await client.ConnectAsync(new ButtplugWebsocketConnectorOptions(new Uri("ws://localhost:12345/buttplug")));
 
@@ -303,11 +342,12 @@ namespace bpclient
                 Console.WriteLine();
                 Console.WriteLine("1. Scan For Devices");
                 Console.WriteLine("2. Control Devices");
-                Console.WriteLine("3. Toggle auto reconnect (currently " + (reconnect ? "enabled" : "disabled") + ")");
-                Console.WriteLine("4. Quit");
+                Console.WriteLine("3. Load values");
+                Console.WriteLine("4. Toggle auto reconnect (currently " + (reconnect ? "enabled" : "disabled") + ")");
+                Console.WriteLine("5. Quit");
                 Console.WriteLine("Choose an option: ");
                 if (!uint.TryParse(Console.ReadLine(), out var choice) ||
-                    (choice == 0 || choice > 4))
+                    (choice == 0 || choice > 5))
                 {
                     Console.WriteLine("Invalid choice, try again.");
                     continue;
@@ -322,9 +362,12 @@ namespace bpclient
                         await Connect();
                         continue;
                     case 3:
-                        reconnect = !reconnect;
+                        UpdateValues("values.json");
                         continue;
                     case 4:
+                        reconnect = !reconnect;
+                        continue;
+                    case 5:
                         return;
                     default:
                         Console.WriteLine("Invalid choice, try again.");
@@ -335,6 +378,7 @@ namespace bpclient
 
         static void Main(string[] args)
         {
+            UpdateValues("values.json");
             Run().Wait();
         }
     }
