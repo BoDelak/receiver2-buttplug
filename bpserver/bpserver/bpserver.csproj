@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F3B752A4-1476-4E83-AD22-E864B2A48B28}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>bpclient</RootNamespace>
-    <AssemblyName>bpclient</AssemblyName>
+    <RootNamespace>bpserver</RootNamespace>
+    <AssemblyName>bpserver</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
