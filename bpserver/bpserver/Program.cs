@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace bpclient
 {
-    class Item
+    class JSONItem
     {
         public double strength;
         public int time;
@@ -22,34 +22,35 @@ namespace bpclient
     {
         static ButtplugClient client;
         static bool reconnect = false;
-        static List<Item> items;
+        static List<JSONItem> values;
+        static bool waitingForVibrations = false;
 
         public static void UpdateValues(string path)
         {
             using (StreamReader r = new StreamReader(path))
             {
                 string json = r.ReadToEnd();
-                items = JsonConvert.DeserializeObject<List<Item>>(json);
+                values = JsonConvert.DeserializeObject<List<JSONItem>>(json);
             }
-            if(items.Count < 8)
+            if(values.Count < 8)
             {
                 Console.WriteLine("Less than 8 values loaded. Using default values");
-                items[0].strength = 0.3;
-                items[0].time = 100;
-                items[1].strength = 1.0;
-                items[1].time = 200;
-                items[2].strength = 0.5;
-                items[2].time = 100;
-                items[3].strength = 0.0;
-                items[3].time = 0;
-                items[4].strength = 0.8;
-                items[4].time = 100;
-                items[5].strength = 1.0;
-                items[5].time = 3000;
-                items[6].strength = 0.8;
-                items[6].time = 600;
-                items[7].strength = 0.0;
-                items[7].time = 0;
+                values[0].strength = 0.3;
+                values[0].time = 100;
+                values[1].strength = 1.0;
+                values[1].time = 200;
+                values[2].strength = 0.5;
+                values[2].time = 100;
+                values[3].strength = 0.0;
+                values[3].time = 0;
+                values[4].strength = 0.8;
+                values[4].time = 100;
+                values[5].strength = 1.0;
+                values[5].time = 3000;
+                values[6].strength = 0.8;
+                values[6].time = 600;
+                values[7].strength = 0.0;
+                values[7].time = 0;
             }
         }
 
@@ -59,14 +60,6 @@ namespace bpclient
             {
                 if (_tcpClient != null && _tcpClient.Client != null && _tcpClient.Client.Connected)
                 {
-                    /* pear to the documentation on Poll:
-                     * When passing SelectMode.SelectRead as a parameter to the Poll method it will return 
-                     * -either- true if Socket.Listen(Int32) has been called and a connection is pending;
-                     * -or- true if data is available for reading; 
-                     * -or- true if the connection has been closed, reset, or terminated; 
-                     * otherwise, returns false
-                     */
-
                     // Detect if client disconnected
                     if (_tcpClient.Client.Poll(0, SelectMode.SelectRead))
                     {
@@ -99,7 +92,7 @@ namespace bpclient
         {
             TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 54321);
             server.Start();
-            Console.WriteLine("Server started on 127.0.0.1:54321.{0}Waiting for a connection", Environment.NewLine);
+            Console.WriteLine("Server started on 127.0.0.1:54321.\r\nWaiting for a connection");
 
             do
             {
@@ -123,6 +116,7 @@ namespace bpclient
 
                         if (Regex.IsMatch(s, "^GET", RegexOptions.IgnoreCase))
                         {
+                            Console.WriteLine("Handshaking from client\r\n");
                             //Console.WriteLine("=====Handshaking from client=====\n{0}", s);
 
                             // 1. Obtain the value of the "Sec-WebSocket-Key" request header without any leading or trailing whitespace
@@ -154,23 +148,11 @@ namespace bpclient
 
                             if (msglen == 126)
                             {
-                                // was ToUInt16(bytes, offset) but the result is incorrect
                                 msglen = BitConverter.ToUInt16(new byte[] { bytes[3], bytes[2] }, 0);
                                 offset = 4;
                             }
-                            else if (msglen == 127)
-                            {
-                                Console.WriteLine("TODO: msglen == 127, needs qword to store msglen");
-                                // i don't really know the byte order, please edit this
-                                // msglen = BitConverter.ToUInt64(new byte[] { bytes[5], bytes[4], bytes[3], bytes[2], bytes[9], bytes[8], bytes[7], bytes[6] }, 0);
-                                // offset = 10;
-                            }
 
-                            if (msglen == 0)
-                            {
-                                //Console.WriteLine("msglen == 0");
-                            }
-                            else if (mask)
+                            if (msglen != 0 && mask)
                             {
                                 byte[] decoded = new byte[msglen];
                                 byte[] masks = new byte[4] { bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3] };
@@ -180,12 +162,9 @@ namespace bpclient
                                     decoded[i] = (byte)(bytes[offset + i] ^ masks[i % 4]);
 
                                 string text = Encoding.UTF8.GetString(decoded);
-                                //Console.WriteLine("{0}", text);
                                 bool validtext = await ProcessCommand(text);
                                 if (!validtext) break;
                             }
-                            else
-                                Console.WriteLine("mask bit not set");
                         }
                     }
                     catch(Exception ex)
@@ -200,67 +179,38 @@ namespace bpclient
 
         private static async Task<bool> ProcessCommand(string text)
         {
-            if(text.Length > 0)
+            switch(text)
             {
-                switch(text)
-                {
-                    case "0":
-                        // player shoot
-                        await ControlDevice(items[0].strength, items[0].time);
-                        break;
-                    case "1":
-                        // explosion
-                        await ControlDevice(items[1].strength, items[0].time);
-                        break;
-                    case "2":
-                        // fall
-                        await ControlDevice(items[2].strength, items[2].time);
-                        break;
-                    case "3":
-                        // glass
-                        await ControlDevice(items[3].strength, items[3].time);
-                        break;
-                    case "4":
-                        // holsterdischarge
-                        await ControlDevice(items[4].strength, items[4].time);
-                        break;
-                    case "5":
-                        // shock
-                        await ControlDevice(items[5].strength, items[5].time);
-                        break;
-                    case "6":
-                        // shot
-                        //await VibratePattern(0.6, 100, 2, 5); // temp 5 repeats. maybe in future get how many shots?
-                        await ControlDevice(items[6].strength, items[6].time);
-                        break;
-                    case "7":
-                        // shrapnel
-                        await ControlDevice(items[7].strength, items[7].time);
-                        break;
-                    default:
-                        Console.WriteLine("Invalid code. Received: " + text);
-                        return false;
-                }
-                return true;
-                //int splitindex = text.IndexOf(',');
-                //string sub = text.Substring(0, splitindex);
-                //string sub2 = text.Substring(splitindex + 1, text.Length - splitindex - 1);
-                //bool failed = false;
-                //if (!float.TryParse(sub, out float strength))
-                //{
-                //    failed = true;
-                //}
-                //if (!int.TryParse(sub2, out int time))
-                //{
-                //    failed = true;
-                //}
-
-                //if (!failed)
-                //{
-                //    await ControlDevice(strength, time);
-                //}
+                case "0":
+                    await ControlDevice(values[0].strength, values[0].time, "Shoot");
+                    break;
+                case "1":
+                    await ControlDevice(values[1].strength, values[0].time, "Explosion");
+                    break;
+                case "2":
+                    await ControlDevice(values[2].strength, values[2].time, "Fall");
+                    break;
+                case "3":
+                    await ControlDevice(values[3].strength, values[3].time, "Glass");
+                    break;
+                case "4":
+                    await ControlDevice(values[4].strength, values[4].time, "Holster discharge");
+                    break;
+                case "5":
+                    await ControlDevice(values[5].strength, values[5].time, "Shocked");
+                    break;
+                case "6":
+                    //await VibratePattern(0.6, 100, 2, 5, "Shot"); // temp 5 repeats. maybe in future get how many shots?
+                    await ControlDevice(values[6].strength, values[6].time, "Shot");
+                    break;
+                case "7":
+                    await ControlDevice(values[7].strength, values[7].time, "Shrapnel");
+                    break;
+                default:
+                    Console.WriteLine("Invalid code. Received: " + text);
+                    return false;
             }
-            return false;
+            return true;
         }
 
         private static async Task WaitForKey()
@@ -273,36 +223,41 @@ namespace bpclient
             Console.ReadKey(true);
         }
 
-        private static async Task ControlDevice(double strength, int time)
+        private static async Task ControlDevice(double strength, int time, string label)
         {
             if (!client.Devices.Any())
             {
                 Console.WriteLine("No devices available. Please scan for a device.");
             }
 
-            foreach (ButtplugClientDevice device in client.Devices)
+            else
             {
-                Console.WriteLine(
-                    $"Vibrating all motors of {device.Name} at " + strength + " for " + time + "ms");
-                try
+                while (waitingForVibrations) { } // wait here until previous is done
+                waitingForVibrations = true;
+                foreach (ButtplugClientDevice device in client.Devices)
                 {
-                    await device.SendVibrateCmd(strength);
-                    await Task.Delay(time);
-                    await device.SendVibrateCmd(0);
+                    Console.WriteLine($"\"{label}\": Vibrating at {strength * 100}% for {time * 0.001}s");
+                    try
+                    {
+                        await device.SendVibrateCmd(strength);
+                        await Task.Delay(time);
+                        await device.SendVibrateCmd(0);
+                    }
+                    catch (ButtplugDeviceException)
+                    {
+                        Console.WriteLine("Device disconnected. Please try another device.");
+                    }
                 }
-                catch (ButtplugDeviceException)
-                {
-                    Console.WriteLine("Device disconnected. Please try another device.");
-                }
+                waitingForVibrations = false;
             }
             return;
         }
 
-        private static async Task VibratePattern(double strength, int time, int downtime, int repeats)
+        private static async Task VibratePattern(double strength, int time, int downtime, int repeats, string label)
         {
             for(int i = 0; i < repeats; i++)
             {
-                await ControlDevice(strength, time);
+                await ControlDevice(strength, time, label);
                 await Task.Delay(time + downtime);
             }
         }
@@ -330,8 +285,6 @@ namespace bpclient
                 Console.WriteLine("Found devices will be printed to console.");
                 await client.StartScanningAsync();
                 await WaitForKey();
-
-                // Stop scanning now, 'cause we don't want new devices popping up anymore.
                 await client.StopScanningAsync();
             }
 
@@ -339,9 +292,8 @@ namespace bpclient
 
             while(true)
             {
-                Console.WriteLine();
-                Console.WriteLine("1. Scan For Devices");
-                Console.WriteLine("2. Control Devices");
+                Console.WriteLine("1. Scan for devices");
+                Console.WriteLine("2. Control devices");
                 Console.WriteLine("3. Load values");
                 Console.WriteLine("4. Toggle auto reconnect (currently " + (reconnect ? "enabled" : "disabled") + ")");
                 Console.WriteLine("5. Quit");
@@ -357,22 +309,23 @@ namespace bpclient
                 {
                     case 1:
                         await ScanForDevices();
-                        continue;
+                        break;
                     case 2:
                         await Connect();
-                        continue;
+                        break;
                     case 3:
                         UpdateValues("values.json");
-                        continue;
+                        break;
                     case 4:
                         reconnect = !reconnect;
-                        continue;
+                        break;
                     case 5:
                         return;
                     default:
                         Console.WriteLine("Invalid choice, try again.");
-                        continue;
+                        break;
                 }
+                Console.WriteLine();
             }
         }
 
