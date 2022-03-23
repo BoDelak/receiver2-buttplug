@@ -255,12 +255,22 @@ namespace bpclient
                     try
                     {
                         await device.SendVibrateCmd(strength);
-                        await Task.Delay(time);
+                    }
+                    catch (ButtplugDeviceException)
+                    {
+                        Console.WriteLine($"{device.Name} disconnected");
+                    }
+                }
+                await Task.Delay(time);
+                foreach (ButtplugClientDevice device in client.Devices)
+                {
+                    try
+                    {
                         await device.SendVibrateCmd(0);
                     }
                     catch (ButtplugDeviceException)
                     {
-                        Console.WriteLine("Device disconnected. Please try another device.");
+                        Console.WriteLine($"{device.Name} disconnected");
                     }
                 }
                 waitingForVibrations = false;
