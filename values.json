@@ -1,6 +1,6 @@
 [
 		{
-			"strength": 0.3,
+			"strength": 0.4,
 			"time": 100
 		},
 		{
@@ -8,7 +8,7 @@
 			"time": 200
 		},
 		{
-			"strength": 0.5,
+			"strength": 0.6,
 			"time": 100
 		},
 		{
@@ -30,5 +30,17 @@
 		{
 			"strength": 0.0,
 			"time": 0
+		}
+		{
+			"strength": 1.0,
+			"time": 400
+		}
+		{
+			"strength": 0.2,
+			"time": 100
+		}
+		{
+			"strength": 0.4,
+			"time": 200
 		}
 	]
