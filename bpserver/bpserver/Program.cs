@@ -219,7 +219,7 @@ namespace bpclient
                     await ControlDevice(values[9].strength, values[9].time, "Hack Tap");
                     break;
                 case "10":
-                    await ControlDevice(values[7].strength, values[7].time, "Hack Complete");
+                    await ControlDevice(values[10].strength, values[10].time, "Hack Complete");
                     break;
                 default:
                     Console.WriteLine("Invalid code. Received: " + text);
