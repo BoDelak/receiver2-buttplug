@@ -32,14 +32,14 @@ namespace bpclient
                 string json = r.ReadToEnd();
                 values = JsonConvert.DeserializeObject<List<JSONItem>>(json);
             }
-            if(values.Count < 8)
+            if(values.Count < 10)
             {
                 Console.WriteLine("Less than 8 values loaded. Using default values");
-                values[0].strength = 0.3;
+                values[0].strength = 0.4;
                 values[0].time = 100;
                 values[1].strength = 1.0;
                 values[1].time = 200;
-                values[2].strength = 0.5;
+                values[2].strength = 0.6;
                 values[2].time = 100;
                 values[3].strength = 0.0;
                 values[3].time = 0;
@@ -51,6 +51,12 @@ namespace bpclient
                 values[6].time = 600;
                 values[7].strength = 0.0;
                 values[7].time = 0;
+                values[8].strength = 1.0;
+                values[8].time = 400;
+                values[9].strength = 0.2;
+                values[9].time = 100;
+                values[10].strength = 0.4;
+                values[10].time = 200;
             }
         }
 
@@ -205,6 +211,15 @@ namespace bpclient
                     break;
                 case "7":
                     await ControlDevice(values[7].strength, values[7].time, "Shrapnel");
+                    break;
+                case "8":
+                    await ControlDevice(values[8].strength, values[8].time, "Impaled");
+                    break;
+                case "9":
+                    await ControlDevice(values[9].strength, values[9].time, "Hack Tap");
+                    break;
+                case "10":
+                    await ControlDevice(values[7].strength, values[7].time, "Hack Complete");
                     break;
                 default:
                     Console.WriteLine("Invalid code. Received: " + text);
