@@ -30,15 +30,15 @@
 		{
 			"strength": 0.0,
 			"time": 0
-		}
+		},
 		{
 			"strength": 1.0,
 			"time": 400
-		}
+		},
 		{
 			"strength": 0.2,
 			"time": 100
-		}
+		},
 		{
 			"strength": 0.4,
 			"time": 200
