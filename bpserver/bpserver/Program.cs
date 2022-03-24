@@ -12,6 +12,11 @@ using System.Collections.Generic;
 
 namespace bpclient
 {
+    class Items
+    {
+        public JSONItem playerShoot, explosion, fall, glass, holsterDischarge, shock, shot, shrapnel, impaled, hackTap, hackComplete;
+    }
+
     class JSONItem
     {
         public double strength;
@@ -22,41 +27,59 @@ namespace bpclient
     {
         static ButtplugClient client;
         static bool reconnect = false;
-        static List<JSONItem> values;
+        static Items values;
         static bool waitingForVibrations = false;
 
         public static void UpdateValues(string path)
         {
-            using (StreamReader r = new StreamReader(path))
+            try
             {
-                string json = r.ReadToEnd();
-                values = JsonConvert.DeserializeObject<List<JSONItem>>(json);
+                using (StreamReader r = new StreamReader(path))
+                {
+                    string json = r.ReadToEnd();
+                    values = JsonConvert.DeserializeObject<Items>(json);
+
+                    Console.WriteLine($"\r\nLoaded values from \'{path}\':");
+                    Console.WriteLine($"Player shoot: {values.playerShoot.strength}/{values.playerShoot.time}\r\n" +
+                                    $"Explosion: {values.explosion.strength}/{values.explosion.time}\r\n" +
+                                    $"Fall: {values.fall.strength}/{values.fall.time}\r\n" +
+                                    $"Glass: {values.glass.strength}/{values.glass.time}\r\n" +
+                                    $"Holster discharge: {values.holsterDischarge.strength}/{values.holsterDischarge.time}\r\n" +
+                                    $"Shock: {values.shock.strength}/{values.shock.time}\r\n" +
+                                    $"Shot: {values.shot.strength}/{values.shot.time}\r\n" +
+                                    $"Shrapnel: {values.shrapnel.strength}/{values.shrapnel.time}\r\n" +
+                                    $"Impaled: {values.impaled.strength}/{values.impaled.time}\r\n" +
+                                    $"Hack tap: {values.hackTap.strength}/{values.hackTap.time}\r\n" +
+                                    $"Hack complete: {values.hackComplete.strength}/{values.hackComplete.time}\r\n");
+                }
             }
-            if(values.Count < 10)
+            catch(Exception ex)
             {
-                Console.WriteLine("Less than 8 values loaded. Using default values");
-                values[0].strength = 0.4;
-                values[0].time = 100;
-                values[1].strength = 1.0;
-                values[1].time = 200;
-                values[2].strength = 0.6;
-                values[2].time = 100;
-                values[3].strength = 0.0;
-                values[3].time = 0;
-                values[4].strength = 0.8;
-                values[4].time = 100;
-                values[5].strength = 1.0;
-                values[5].time = 3000;
-                values[6].strength = 0.8;
-                values[6].time = 600;
-                values[7].strength = 0.0;
-                values[7].time = 0;
-                values[8].strength = 1.0;
-                values[8].time = 400;
-                values[9].strength = 0.2;
-                values[9].time = 100;
-                values[10].strength = 0.4;
-                values[10].time = 200;
+                Console.WriteLine($"{ex.Message}\r\nLoading default values");
+
+                values = new Items();
+                values.playerShoot.strength = 0.4;
+                values.playerShoot.time = 100;
+                values.explosion.strength = 1.0;
+                values.explosion.time = 200;
+                values.fall.strength = 0.6;
+                values.fall.time = 100;
+                values.glass.strength = 0.0;
+                values.glass.time = 0;
+                values.holsterDischarge.strength = 0.8;
+                values.holsterDischarge.time = 100;
+                values.shock.strength = 1.0;
+                values.shock.time = 3000;
+                values.shot.strength = 0.8;
+                values.shot.time = 600;
+                values.shrapnel.strength = 0.0;
+                values.shrapnel.time = 0;
+                values.impaled.strength = 1.0;
+                values.impaled.time = 400;
+                values.hackTap.strength = 0.2;
+                values.hackTap.time = 100;
+                values.hackComplete.strength = 0.4;
+                values.hackComplete.time = 200;
             }
         }
 
@@ -188,38 +211,38 @@ namespace bpclient
             switch(text)
             {
                 case "0":
-                    await ControlDevice(values[0].strength, values[0].time, "Shoot");
+                    await ControlDevice(values.playerShoot.strength, values.playerShoot.time, "Player shoot");
                     break;
                 case "1":
-                    await ControlDevice(values[1].strength, values[0].time, "Explosion");
+                    await ControlDevice(values.explosion.strength, values.explosion.time, "Explosion");
                     break;
                 case "2":
-                    await ControlDevice(values[2].strength, values[2].time, "Fall");
+                    await ControlDevice(values.fall.strength, values.fall.time, "Fall");
                     break;
                 case "3":
-                    await ControlDevice(values[3].strength, values[3].time, "Glass");
+                    await ControlDevice(values.glass.strength, values.glass.time, "Glass");
                     break;
                 case "4":
-                    await ControlDevice(values[4].strength, values[4].time, "Holster discharge");
+                    await ControlDevice(values.holsterDischarge.strength, values.holsterDischarge.time, "Holster discharge");
                     break;
                 case "5":
-                    await ControlDevice(values[5].strength, values[5].time, "Shocked");
+                    await ControlDevice(values.shock.strength, values.shock.time, "Shocked");
                     break;
                 case "6":
                     //await VibratePattern(0.6, 100, 2, 5, "Shot"); // temp 5 repeats. maybe in future get how many shots?
-                    await ControlDevice(values[6].strength, values[6].time, "Shot");
+                    await ControlDevice(values.shot.strength, values.shot.time, "Shot");
                     break;
                 case "7":
-                    await ControlDevice(values[7].strength, values[7].time, "Shrapnel");
+                    await ControlDevice(values.shrapnel.strength, values.shrapnel.time, "Shrapnel");
                     break;
                 case "8":
-                    await ControlDevice(values[8].strength, values[8].time, "Impaled");
+                    await ControlDevice(values.impaled.strength, values.impaled.time, "Impaled");
                     break;
                 case "9":
-                    await ControlDevice(values[9].strength, values[9].time, "Hack Tap");
+                    await ControlDevice(values.hackTap.strength, values.hackTap.time, "Hack Tap");
                     break;
                 case "10":
-                    await ControlDevice(values[10].strength, values[10].time, "Hack Complete");
+                    await ControlDevice(values.hackComplete.strength, values.hackComplete.time, "Hack Complete");
                     break;
                 default:
                     Console.WriteLine("Invalid code. Received: " + text);

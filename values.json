@@ -1,46 +1,46 @@
-[
-		{
+{
+		"playerShoot": {
 			"strength": 0.4,
 			"time": 100
 		},
-		{
+		"explosion": {
 			"strength": 1.0,
 			"time": 200
 		},
-		{
+		"fall": {
 			"strength": 0.6,
 			"time": 100
 		},
-		{
+		"glass": {
 			"strength": 0.0,
 			"time": 0
 		},
-		{
+		"holsterDischarge": {
 			"strength": 0.8,
 			"time": 100
 		},
-		{
+		"shock": {
 			"strength": 1.0,
 			"time": 3000
 		},
-		{
+		"shot": {
 			"strength": 0.8,
 			"time": 600
 		},
-		{
+		"shrapnel": {
 			"strength": 0.0,
 			"time": 0
 		},
-		{
+		"impaled": {
 			"strength": 1.0,
 			"time": 400
 		},
-		{
+		"hackTap": {
 			"strength": 0.2,
 			"time": 100
 		},
-		{
+		"hackComplete": {
 			"strength": 0.4,
 			"time": 200
 		}
-	]
+}
