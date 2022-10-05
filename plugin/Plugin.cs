@@ -17,7 +17,7 @@ namespace Receiver2BP
 	{
 		internal const string pluginGuid = "bodle.receiver2.bp";
 		internal const string pluginName = "Receiver 2 BP";
-		internal const string pluginVersion = "0.1";
+		internal const string pluginVersion = "1.0";
 		
 		internal static ManualLogSource Log;
 
